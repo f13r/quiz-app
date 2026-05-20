@@ -37,6 +37,7 @@ io.on('connection', (socket) => {
 
   socket.on('start-game', () => {
     if (state.gamePhase !== 'setup') return
+    if (!state.teams.blue.players.length || !state.teams.yellow.players.length) return
     state = startGame(state)
     broadcast()
   })
@@ -60,6 +61,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('undo', () => {
+    if (state.gamePhase !== 'playing') return
     state = undo(state)
     broadcast()
   })
@@ -71,6 +73,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('new-game', () => {
+    if (state.gamePhase !== 'ended') return
     state = newGame()
     broadcast()
   })
