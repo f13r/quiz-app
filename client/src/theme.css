@@ -1,0 +1,234 @@
+:root {
+  --blue: #1A3A8C;
+  --yellow: #F5C800;
+  --white: #FFFFFF;
+  --dark: #1A1A1A;
+  --blue-light: #2B4FA8;
+  --yellow-dark: #D4AC00;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--blue);
+  color: var(--white);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+  gap: 16px;
+}
+
+.screen--blue {
+  background: var(--blue);
+  color: var(--white);
+}
+
+.screen--yellow {
+  background: var(--yellow);
+  color: var(--dark);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.card--solid {
+  background: var(--white);
+  color: var(--dark);
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.btn--correct {
+  background: #22C55E;
+  color: white;
+  font-size: 1.3rem;
+  padding: 20px;
+}
+
+.btn--wrong {
+  background: #EF4444;
+  color: white;
+  font-size: 1.3rem;
+  padding: 20px;
+}
+
+.btn--next {
+  background: var(--yellow);
+  color: var(--dark);
+  font-size: 1.3rem;
+  padding: 20px;
+}
+
+.btn--start {
+  background: var(--yellow);
+  color: var(--dark);
+  margin-top: auto;
+}
+
+.btn--new-game {
+  background: var(--yellow);
+  color: var(--dark);
+}
+
+.btn--add {
+  background: rgba(255,255,255,0.2);
+  color: inherit;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.btn--undo {
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+.btn--end {
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  padding: 10px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Input */
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.input::placeholder {
+  opacity: 0.6;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.7);
+}
+
+/* Player radio option */
+.player-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.1);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: background 0.1s;
+}
+
+.player-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--yellow);
+  cursor: pointer;
+}
+
+.player-option--selected {
+  background: rgba(255,255,255,0.25);
+  outline: 2px solid rgba(255,255,255,0.6);
+}
+
+/* Steal badge */
+.steal-badge {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--dark);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.screen--yellow .steal-badge {
+  background: var(--blue);
+  color: var(--white);
+}
+
+/* Score display */
+.score-big {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Connecting indicator */
+.connecting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+}
