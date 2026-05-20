@@ -59,8 +59,9 @@ export function startGame(state) {
 }
 
 export function markCorrect(state, playerId) {
-  const prev = saveForUndo(state)
   const team = state.activeTeam
+  if (!state.teams[team].players.some(p => p.id === playerId)) return state
+  const prev = saveForUndo(state)
   const updatedPlayers = state.teams[team].players.map(p =>
     p.id === playerId ? { ...p, points: p.points + 1 } : p
   )

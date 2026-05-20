@@ -176,8 +176,7 @@ describe('undo', () => {
   test('is a no-op when there is nothing to undo', () => {
     const s = twoPlayerGame()
     const same = undo(s)
-    assert.equal(same.questionIndex, s.questionIndex)
-    assert.equal(same.questionCounter, s.questionCounter)
+    assert.strictEqual(same, s)
   })
 })
 
