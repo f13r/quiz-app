@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import socket from '../socket'
 import SetupScreen from './SetupScreen'
 import GameScreen from './GameScreen'
+import ResultsScreen from './ResultsScreen'
 
 export default function HostApp() {
   const [gameState, setGameState] = useState(null)
@@ -14,5 +15,5 @@ export default function HostApp() {
   if (!gameState) return <div className="connecting">З'єднання...</div>
   if (gameState.gamePhase === 'setup') return <SetupScreen gameState={gameState} />
   if (gameState.gamePhase === 'playing') return <GameScreen gameState={gameState} />
-  return null // results screen added in Task 9
+  return <ResultsScreen gameState={gameState} />
 }
