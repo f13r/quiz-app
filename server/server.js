@@ -28,6 +28,8 @@ io.on('connection', (socket) => {
   socket.emit('game-state', state)
 
   socket.on('add-player', ({ team, name }) => {
+    if (state.gamePhase !== 'setup') return
+    if (!['blue', 'yellow'].includes(team)) return
     if (!name || !name.trim()) return
     state = addPlayer(state, team, name.trim())
     broadcast()
@@ -52,7 +54,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('next-card', () => {
-    if (!state.cardComplete) return
+    if (state.gamePhase !== 'playing' || !state.cardComplete) return
     state = nextCard(state)
     broadcast()
   })
