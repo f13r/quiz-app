@@ -1,21 +1,9 @@
-function teamTotal(players) {
-  return players.reduce((sum, p) => sum + p.points, 0)
-}
-
-function top3(teams) {
-  return [
-    ...teams.blue.players.map(p => ({ ...p, team: 'blue' })),
-    ...teams.yellow.players.map(p => ({ ...p, team: 'yellow' }))
-  ]
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 3)
-}
+import { deriveResults } from '../deriveResults'
 
 export default function DashboardScreen({ gameState }) {
   const { teams, cardOwner, activeTeam, questionIndex, isStealing, questionCounter } = gameState
-  const blueTotal = teamTotal(teams.blue.players)
-  const yellowTotal = teamTotal(teams.yellow.players)
-  const leaders = top3(teams)
+  const { blueTotal, yellowTotal, rankedPlayers } = deriveResults(gameState)
+  const leaders = rankedPlayers.slice(0, 3)
 
   const isBlue = activeTeam === 'blue'
   const cardOwnerLabel = cardOwner === 'blue' ? 'Синя' : 'Жовта'

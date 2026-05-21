@@ -1,25 +1,8 @@
+import { deriveResults } from '../deriveResults'
 import socket from '../socket'
 
-function teamTotal(players) {
-  return players.reduce((sum, p) => sum + p.points, 0)
-}
-
-function allPlayersSorted(teams) {
-  return [
-    ...teams.blue.players.map(p => ({ ...p, team: 'blue' })),
-    ...teams.yellow.players.map(p => ({ ...p, team: 'yellow' }))
-  ].sort((a, b) => b.points - a.points)
-}
-
 export default function ResultsScreen({ gameState }) {
-  const { teams } = gameState
-  const blueTotal = teamTotal(teams.blue.players)
-  const yellowTotal = teamTotal(teams.yellow.players)
-  const sorted = allPlayersSorted(teams)
-
-  const winner = blueTotal > yellowTotal ? 'blue'
-    : yellowTotal > blueTotal ? 'yellow'
-    : 'draw'
+  const { blueTotal, yellowTotal, winner, rankedPlayers: sorted } = deriveResults(gameState)
 
   const winnerText = winner === 'blue' ? '🏆 Синя команда перемогла!'
     : winner === 'yellow' ? '🏆 Жовта команда перемогла!'

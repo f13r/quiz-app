@@ -2,7 +2,8 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   createGame, addPlayer, startGame,
-  markCorrect, markWrong, nextCard, undo, endGame, newGame
+  markCorrect, markWrong, nextCard, undo, endGame, newGame,
+  deriveResults
 } from '../gameState.js'
 
 function twoPlayerGame() {
@@ -196,6 +197,63 @@ describe('newGame', () => {
     assert.equal(s.gamePhase, 'setup')
     assert.deepEqual(s.teams.blue.players, [])
     assert.deepEqual(s.teams.yellow.players, [])
+  })
+})
+
+describe('deriveResults', () => {
+  function stateWithPoints(bluePoints, yellowPoints) {
+    let s = createGame()
+    bluePoints.forEach((pts, i) => s = addPlayer(s, 'blue', `Blue${i + 1}`))
+    yellowPoints.forEach((pts, i) => s = addPlayer(s, 'yellow', `Yellow${i + 1}`))
+    s = startGame(s)
+    // Manually assign points by reconstructing player arrays
+    s = {
+      ...s,
+      teams: {
+        blue: { players: s.teams.blue.players.map((p, i) => ({ ...p, points: bluePoints[i] })) },
+        yellow: { players: s.teams.yellow.players.map((p, i) => ({ ...p, points: yellowPoints[i] })) }
+      }
+    }
+    return s
+  }
+
+  test('winner is blue when blue has more points', () => {
+    const s = stateWithPoints([3, 2], [1, 1])
+    const { winner } = deriveResults(s)
+    assert.equal(winner, 'blue')
+  })
+
+  test('winner is yellow when yellow has more points', () => {
+    const s = stateWithPoints([1, 0], [3, 2])
+    const { winner } = deriveResults(s)
+    assert.equal(winner, 'yellow')
+  })
+
+  test('winner is draw when scores are equal', () => {
+    const s = stateWithPoints([2, 1], [2, 1])
+    const { winner } = deriveResults(s)
+    assert.equal(winner, 'draw')
+  })
+
+  test('rankedPlayers are sorted descending by points', () => {
+    const s = stateWithPoints([5, 1], [3, 2])
+    const { rankedPlayers } = deriveResults(s)
+    for (let i = 0; i < rankedPlayers.length - 1; i++) {
+      assert.ok(rankedPlayers[i].points >= rankedPlayers[i + 1].points)
+    }
+  })
+
+  test('rankedPlayers include team property on each player', () => {
+    const s = stateWithPoints([2], [3])
+    const { rankedPlayers } = deriveResults(s)
+    assert.ok(rankedPlayers.every(p => p.team === 'blue' || p.team === 'yellow'))
+  })
+
+  test('blueTotal and yellowTotal correctly sum player points', () => {
+    const s = stateWithPoints([4, 2], [3, 1])
+    const { blueTotal, yellowTotal } = deriveResults(s)
+    assert.equal(blueTotal, 6)
+    assert.equal(yellowTotal, 4)
   })
 })
 
