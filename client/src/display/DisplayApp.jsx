@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react'
-import socket from '../socket'
+import { useGameState } from '../useGameState'
 import LobbyScreen from './LobbyScreen'
 import DashboardScreen from './DashboardScreen'
 import ResultsScreen from './ResultsScreen'
 
 export default function DisplayApp() {
-  const [gameState, setGameState] = useState(null)
-
-  useEffect(() => {
-    socket.on('game-state', setGameState)
-    return () => socket.off('game-state', setGameState)
-  }, [])
+  const gameState = useGameState()
 
   if (!gameState) return (
     <div style={{

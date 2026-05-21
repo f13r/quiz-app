@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react'
-import socket from '../socket'
+import { useGameState } from '../useGameState'
 import SetupScreen from './SetupScreen'
 import GameScreen from './GameScreen'
 import ResultsScreen from './ResultsScreen'
 
 export default function HostApp() {
-  const [gameState, setGameState] = useState(null)
-
-  useEffect(() => {
-    socket.on('game-state', setGameState)
-    return () => socket.off('game-state', setGameState)
-  }, [])
+  const gameState = useGameState()
 
   if (!gameState) return <div className="connecting">З'єднання...</div>
   if (gameState.gamePhase === 'setup') return <SetupScreen gameState={gameState} />
