@@ -255,6 +255,26 @@ describe('deriveResults', () => {
     assert.equal(blueTotal, 6)
     assert.equal(yellowTotal, 4)
   })
+
+  test('rankedPlayers includes all players when scores are tied', () => {
+    let s = createGame()
+    s = addPlayer(s, 'blue', 'A')
+    s = addPlayer(s, 'blue', 'B')
+    s = addPlayer(s, 'yellow', 'C')
+    s = addPlayer(s, 'yellow', 'D')
+    s = startGame(s)
+    // give everyone 2 points manually
+    s = {
+      ...s,
+      teams: {
+        blue: { players: s.teams.blue.players.map(p => ({ ...p, points: 2 })) },
+        yellow: { players: s.teams.yellow.players.map(p => ({ ...p, points: 2 })) }
+      }
+    }
+    const { rankedPlayers } = deriveResults(s)
+    assert.equal(rankedPlayers.length, 4)
+    assert.ok(rankedPlayers.every(p => p.points === 2))
+  })
 })
 
 describe('phase guard no-ops', () => {

@@ -133,6 +133,9 @@ export function newGame(state) {
 }
 
 export function deriveResults(state) {
+  if (!state?.teams?.blue?.players || !state?.teams?.yellow?.players) {
+    return { blueTotal: 0, yellowTotal: 0, winner: 'draw', rankedPlayers: [] }
+  }
   const blueTotal = state.teams.blue.players.reduce((sum, p) => sum + p.points, 0)
   const yellowTotal = state.teams.yellow.players.reduce((sum, p) => sum + p.points, 0)
   const winner = blueTotal > yellowTotal ? 'blue' : yellowTotal > blueTotal ? 'yellow' : 'draw'
