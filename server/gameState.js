@@ -124,7 +124,7 @@ export function undo(state) {
 
 export function endGame(state) {
   if (state.gamePhase !== 'playing') return state
-  return { ...state, gamePhase: 'ended', lastState: saveForUndo(state) }
+  return { ...state, gamePhase: 'ended' }
 }
 
 export function newGame(state) {

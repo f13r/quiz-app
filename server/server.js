@@ -40,6 +40,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('mark-correct', ({ playerId }) => {
+    if (typeof playerId !== 'number') return
     const next = markCorrect(state, playerId)
     if (next !== state) { state = next; broadcast() }
   })
