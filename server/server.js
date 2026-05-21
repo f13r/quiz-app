@@ -27,6 +27,8 @@ function broadcast() {
 io.on('connection', (socket) => {
   socket.emit('game-state', state)
 
+  socket.on('request-state', () => socket.emit('game-state', state))
+
   socket.on('add-player', ({ team, name }) => {
     if (!['blue', 'yellow'].includes(team)) return
     if (!name || !name.trim()) return

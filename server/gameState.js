@@ -9,10 +9,11 @@ function saveForUndo(state) {
 
 function advance(state) {
   if (state.questionIndex === 3) {
-    return { cardComplete: true, questionCounter: state.questionCounter + 1 }
+    return { questionIndex: state.questionIndex, cardComplete: true, questionCounter: state.questionCounter + 1 }
   }
   return {
     questionIndex: state.questionIndex + 1,
+    cardComplete: false,
     questionCounter: state.questionCounter + 1
   }
 }
