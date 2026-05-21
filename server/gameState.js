@@ -33,6 +33,7 @@ export function createGame() {
 }
 
 export function addPlayer(state, team, name) {
+  if (state.gamePhase !== 'setup') return state
   const player = { id: state.nextPlayerId, name, points: 0 }
   return {
     ...state,
@@ -45,6 +46,8 @@ export function addPlayer(state, team, name) {
 }
 
 export function startGame(state) {
+  if (state.gamePhase !== 'setup') return state
+  if (!state.teams.blue.players.length || !state.teams.yellow.players.length) return state
   return {
     ...state,
     gamePhase: 'playing',
@@ -59,6 +62,7 @@ export function startGame(state) {
 }
 
 export function markCorrect(state, playerId) {
+  if (state.gamePhase !== 'playing' || state.cardComplete) return state
   const team = state.activeTeam
   if (!state.teams[team].players.some(p => p.id === playerId)) return state
   const prev = saveForUndo(state)
@@ -76,6 +80,7 @@ export function markCorrect(state, playerId) {
 }
 
 export function markWrong(state) {
+  if (state.gamePhase !== 'playing' || state.cardComplete) return state
   const prev = saveForUndo(state)
 
   if (!state.isStealing) {
@@ -97,6 +102,7 @@ export function markWrong(state) {
 }
 
 export function nextCard(state) {
+  if (state.gamePhase !== 'playing' || !state.cardComplete) return state
   const prev = saveForUndo(state)
   const newOwner = opposite(state.cardOwner)
   return {
@@ -111,14 +117,17 @@ export function nextCard(state) {
 }
 
 export function undo(state) {
+  if (state.gamePhase !== 'playing') return state
   if (!state.lastState) return state
   return state.lastState
 }
 
 export function endGame(state) {
+  if (state.gamePhase !== 'playing') return state
   return { ...state, gamePhase: 'ended', lastState: saveForUndo(state) }
 }
 
-export function newGame() {
+export function newGame(state) {
+  if (state.gamePhase !== 'ended') return state
   return createGame()
 }

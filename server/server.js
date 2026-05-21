@@ -28,54 +28,45 @@ io.on('connection', (socket) => {
   socket.emit('game-state', state)
 
   socket.on('add-player', ({ team, name }) => {
-    if (state.gamePhase !== 'setup') return
     if (!['blue', 'yellow'].includes(team)) return
     if (!name || !name.trim()) return
-    state = addPlayer(state, team, name.trim())
-    broadcast()
+    const next = addPlayer(state, team, name.trim())
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('start-game', () => {
-    if (state.gamePhase !== 'setup') return
-    if (!state.teams.blue.players.length || !state.teams.yellow.players.length) return
-    state = startGame(state)
-    broadcast()
+    const next = startGame(state)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('mark-correct', ({ playerId }) => {
-    if (state.gamePhase !== 'playing' || state.cardComplete) return
-    state = markCorrect(state, playerId)
-    broadcast()
+    const next = markCorrect(state, playerId)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('mark-wrong', () => {
-    if (state.gamePhase !== 'playing' || state.cardComplete) return
-    state = markWrong(state)
-    broadcast()
+    const next = markWrong(state)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('next-card', () => {
-    if (state.gamePhase !== 'playing' || !state.cardComplete) return
-    state = nextCard(state)
-    broadcast()
+    const next = nextCard(state)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('undo', () => {
-    if (state.gamePhase !== 'playing') return
-    state = undo(state)
-    broadcast()
+    const next = undo(state)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('end-game', () => {
-    if (state.gamePhase !== 'playing') return
-    state = endGame(state)
-    broadcast()
+    const next = endGame(state)
+    if (next !== state) { state = next; broadcast() }
   })
 
   socket.on('new-game', () => {
-    if (state.gamePhase !== 'ended') return
-    state = newGame()
-    broadcast()
+    const next = newGame(state)
+    if (next !== state) { state = next; broadcast() }
   })
 })
 

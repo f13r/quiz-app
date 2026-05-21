@@ -192,9 +192,83 @@ describe('newGame', () => {
   test('returns a fresh setup state', () => {
     let s = twoPlayerGame()
     s = endGame(s)
-    s = newGame()
+    s = newGame(s)
     assert.equal(s.gamePhase, 'setup')
     assert.deepEqual(s.teams.blue.players, [])
     assert.deepEqual(s.teams.yellow.players, [])
+  })
+})
+
+describe('phase guard no-ops', () => {
+  test('addPlayer during playing phase returns state unchanged', () => {
+    const s = twoPlayerGame()
+    assert.strictEqual(addPlayer(s, 'blue', 'Extra'), s)
+  })
+
+  test('startGame during playing phase returns state unchanged', () => {
+    const s = twoPlayerGame()
+    assert.strictEqual(startGame(s), s)
+  })
+
+  test('startGame during setup with no blue players returns state unchanged', () => {
+    let s = createGame()
+    s = addPlayer(s, 'yellow', 'Іван')
+    assert.strictEqual(startGame(s), s)
+  })
+
+  test('startGame during setup with no yellow players returns state unchanged', () => {
+    let s = createGame()
+    s = addPlayer(s, 'blue', 'Олена')
+    assert.strictEqual(startGame(s), s)
+  })
+
+  test('markCorrect during setup phase returns state unchanged', () => {
+    let s = createGame()
+    s = addPlayer(s, 'blue', 'Олена')
+    s = addPlayer(s, 'yellow', 'Іван')
+    const pid = s.teams.blue.players[0].id
+    assert.strictEqual(markCorrect(s, pid), s)
+  })
+
+  test('markCorrect when cardComplete returns state unchanged', () => {
+    let s = twoPlayerGame()
+    const pid = s.teams.blue.players[0].id
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid) // cardComplete = true
+    assert.strictEqual(markCorrect(s, pid), s)
+  })
+
+  test('markWrong when cardComplete returns state unchanged', () => {
+    let s = twoPlayerGame()
+    const pid = s.teams.blue.players[0].id
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid) // cardComplete = true
+    assert.strictEqual(markWrong(s), s)
+  })
+
+  test('nextCard when cardComplete is false returns state unchanged', () => {
+    const s = twoPlayerGame()
+    assert.strictEqual(nextCard(s), s)
+  })
+
+  test('undo during setup phase returns state unchanged', () => {
+    let s = createGame()
+    s = addPlayer(s, 'blue', 'Олена')
+    assert.strictEqual(undo(s), s)
+  })
+
+  test('endGame during setup phase returns state unchanged', () => {
+    let s = createGame()
+    s = addPlayer(s, 'blue', 'Олена')
+    assert.strictEqual(endGame(s), s)
+  })
+
+  test('newGame during playing phase returns state unchanged', () => {
+    const s = twoPlayerGame()
+    assert.strictEqual(newGame(s), s)
   })
 })
