@@ -24,6 +24,14 @@ bash deploy.sh
 
 `deploy.sh` installs all dependencies, compiles the server TypeScript into `dist/server/`, and builds the React client into `client/dist`.
 
+After the first build, create a one-time symlink so Node's ESM resolver can find `server/node_modules` from the compiled output:
+
+```bash
+ln -s $(pwd)/server/node_modules dist/server/node_modules
+```
+
+This only needs to be done once. It survives `git pull` + `bash deploy.sh` updates as long as `dist/` is not deleted.
+
 ## Start the Server
 
 ### One-off (foreground)
