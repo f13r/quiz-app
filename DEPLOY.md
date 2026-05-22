@@ -22,14 +22,14 @@ cd quiz-app
 bash deploy.sh
 ```
 
-`deploy.sh` installs all dependencies and builds the React client into `client/dist`.
+`deploy.sh` installs all dependencies, compiles the server TypeScript into `dist/server/`, and builds the React client into `client/dist`.
 
 ## Start the Server
 
 ### One-off (foreground)
 
 ```bash
-node server/server.js
+node dist/server/server.js
 # or
 npm start
 ```
@@ -39,7 +39,7 @@ Server listens on `http://0.0.0.0:3001`.
 ### With PM2 (keeps running after logout)
 
 ```bash
-pm2 start server/server.js --name quiz
+pm2 start dist/server/server.js --name quiz
 pm2 save                   # persist across reboots
 pm2 startup                # follow the printed command to enable autostart
 ```
@@ -60,9 +60,9 @@ pm2 status         # process list
 | `PORT`   | `3001`  | TCP port the server binds to |
 
 ```bash
-PORT=8080 node server/server.js
+PORT=8080 node dist/server/server.js
 # or with PM2:
-pm2 start server/server.js --name quiz --env production -- PORT=8080
+PORT=8080 pm2 start dist/server/server.js --name quiz
 ```
 
 ## Nginx Reverse Proxy (optional — port 80/443)

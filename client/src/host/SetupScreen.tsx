@@ -1,18 +1,33 @@
 import { useState } from 'react'
-import socket from '../socket'
+import type { GameState, TeamColor, Player } from '../../../shared/types.js'
+import socket from '../socket.js'
 
-export default function SetupScreen({ gameState }) {
+interface Props {
+  gameState: GameState
+}
+
+interface TeamColumnProps {
+  label: string
+  color: TeamColor
+  players: readonly Player[]
+  inputValue: string
+  onInputChange: (value: string) => void
+  onAdd: () => void
+  onKey: (e: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
+export default function SetupScreen({ gameState }: Props) {
   const [blueInput, setBlueInput] = useState('')
   const [yellowInput, setYellowInput] = useState('')
 
-  function addPlayer(team) {
+  function addPlayer(team: TeamColor) {
     const value = team === 'blue' ? blueInput : yellowInput
     if (!value.trim()) return
     socket.emit('add-player', { team, name: value.trim() })
     team === 'blue' ? setBlueInput('') : setYellowInput('')
   }
 
-  function handleKey(e, team) {
+  function handleKey(e: React.KeyboardEvent<HTMLInputElement>, team: TeamColor) {
     if (e.key === 'Enter') addPlayer(team)
   }
 
@@ -56,7 +71,7 @@ export default function SetupScreen({ gameState }) {
   )
 }
 
-function TeamColumn({ label, color, players, inputValue, onInputChange, onAdd, onKey }) {
+function TeamColumn({ label, color, players, inputValue, onInputChange, onAdd, onKey }: TeamColumnProps) {
   const accentStyle = color === 'yellow'
     ? { background: 'rgba(245,200,0,0.15)', border: '1px solid rgba(245,200,0,0.4)' }
     : { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)' }

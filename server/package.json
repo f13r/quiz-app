@@ -3,12 +3,20 @@
   "type": "module",
   "engines": { "node": ">=18" },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "test": "node --test __tests__/gameState.test.js"
+    "start": "node ../dist/server/server.js",
+    "dev": "tsx --watch server.ts",
+    "build": "tsc",
+    "test": "vitest run"
   },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7"
   }
 }

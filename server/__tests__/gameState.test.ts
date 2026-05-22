@@ -1,12 +1,13 @@
-import { test, describe } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, test, expect } from 'vitest'
 import {
   createGame, addPlayer, startGame,
-  markCorrect, markWrong, nextCard, undo, endGame, newGame,
-  deriveResults
+  markCorrect, markWrong, nextCard, undo, endGame, newGame
 } from '../gameState.js'
+import { deriveResults } from '../../shared/deriveResults.js'
+import type { GameState } from '../../shared/types.js'
 
-function twoPlayerGame() {
+
+function twoPlayerGame(): GameState {
   let s = createGame()
   s = addPlayer(s, 'blue', 'Олена')
   s = addPlayer(s, 'yellow', 'Іван')
@@ -16,9 +17,9 @@ function twoPlayerGame() {
 describe('createGame', () => {
   test('returns setup phase with empty teams', () => {
     const s = createGame()
-    assert.equal(s.gamePhase, 'setup')
-    assert.deepEqual(s.teams.blue.players, [])
-    assert.deepEqual(s.teams.yellow.players, [])
+    expect(s.gamePhase).toBe('setup')
+    expect(s.teams.blue.players).toEqual([])
+    expect(s.teams.yellow.players).toEqual([])
   })
 })
 
@@ -26,10 +27,10 @@ describe('addPlayer', () => {
   test('adds named player with 0 points to specified team', () => {
     let s = createGame()
     s = addPlayer(s, 'blue', 'Олена')
-    assert.equal(s.teams.blue.players.length, 1)
-    assert.equal(s.teams.blue.players[0].name, 'Олена')
-    assert.equal(s.teams.blue.players[0].points, 0)
-    assert.equal(typeof s.teams.blue.players[0].id, 'number')
+    expect(s.teams.blue.players.length).toBe(1)
+    expect(s.teams.blue.players[0].name).toBe('Олена')
+    expect(s.teams.blue.players[0].points).toBe(0)
+    expect(typeof s.teams.blue.players[0].id).toBe('number')
   })
 
   test('assigns unique IDs across teams', () => {
@@ -40,7 +41,7 @@ describe('addPlayer', () => {
       s.teams.blue.players[0].id,
       s.teams.yellow.players[0].id
     ]
-    assert.equal(new Set(ids).size, 2)
+    expect(new Set(ids).size).toBe(2)
   })
 })
 
@@ -50,13 +51,13 @@ describe('startGame', () => {
     s = addPlayer(s, 'blue', 'Олена')
     s = addPlayer(s, 'yellow', 'Іван')
     s = startGame(s)
-    assert.equal(s.gamePhase, 'playing')
-    assert.equal(s.cardOwner, 'blue')
-    assert.equal(s.activeTeam, 'blue')
-    assert.equal(s.questionIndex, 0)
-    assert.equal(s.questionCounter, 1)
-    assert.equal(s.isStealing, false)
-    assert.equal(s.cardComplete, false)
+    expect(s.gamePhase).toBe('playing')
+    expect(s.cardOwner).toBe('blue')
+    expect(s.activeTeam).toBe('blue')
+    expect(s.questionIndex).toBe(0)
+    expect(s.questionCounter).toBe(1)
+    expect(s.isStealing).toBe(false)
+    expect(s.cardComplete).toBe(false)
   })
 })
 
@@ -65,41 +66,41 @@ describe('markCorrect', () => {
     const s = twoPlayerGame()
     const pid = s.teams.blue.players[0].id
     const next = markCorrect(s, pid)
-    assert.equal(next.teams.blue.players[0].points, 1)
+    expect(next.teams.blue.players[0].points).toBe(1)
   })
 
   test('advances to next question and increments counter', () => {
     const s = twoPlayerGame()
     const pid = s.teams.blue.players[0].id
     const next = markCorrect(s, pid)
-    assert.equal(next.questionIndex, 1)
-    assert.equal(next.questionCounter, 2)
-    assert.equal(next.isStealing, false)
-    assert.equal(next.activeTeam, 'blue')
+    expect(next.questionIndex).toBe(1)
+    expect(next.questionCounter).toBe(2)
+    expect(next.isStealing).toBe(false)
+    expect(next.activeTeam).toBe('blue')
   })
 
   test('sets cardComplete after Q4 and increments counter', () => {
     let s = twoPlayerGame()
     const pid = s.teams.blue.players[0].id
-    s = markCorrect(s, pid) // Q1→Q2
-    s = markCorrect(s, pid) // Q2→Q3
-    s = markCorrect(s, pid) // Q3→Q4
-    s = markCorrect(s, pid) // Q4→complete
-    assert.equal(s.cardComplete, true)
-    assert.equal(s.questionIndex, 3)
-    assert.equal(s.questionCounter, 5) // pointing to Q1 of next card
-    assert.equal(s.teams.blue.players[0].points, 4)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    expect(s.cardComplete).toBe(true)
+    expect(s.questionIndex).toBe(3)
+    expect(s.questionCounter).toBe(5)
+    expect(s.teams.blue.players[0].points).toBe(4)
   })
 
   test('awards point to stealing team when steal is correct', () => {
     let s = twoPlayerGame()
-    s = markWrong(s) // blue wrong, yellow steals
+    s = markWrong(s)
     const yellowPid = s.teams.yellow.players[0].id
     s = markCorrect(s, yellowPid)
-    assert.equal(s.teams.yellow.players[0].points, 1)
-    assert.equal(s.teams.blue.players[0].points, 0)
-    assert.equal(s.activeTeam, 'blue') // returns to card owner
-    assert.equal(s.isStealing, false)
+    expect(s.teams.yellow.players[0].points).toBe(1)
+    expect(s.teams.blue.players[0].points).toBe(0)
+    expect(s.activeTeam).toBe('blue')
+    expect(s.isStealing).toBe(false)
   })
 })
 
@@ -107,31 +108,31 @@ describe('markWrong', () => {
   test('switches to steal mode for opposing team', () => {
     const s = twoPlayerGame()
     const next = markWrong(s)
-    assert.equal(next.isStealing, true)
-    assert.equal(next.activeTeam, 'yellow')
-    assert.equal(next.questionIndex, 0) // same question, not advanced
-    assert.equal(next.questionCounter, 1) // counter unchanged during steal setup
+    expect(next.isStealing).toBe(true)
+    expect(next.activeTeam).toBe('yellow')
+    expect(next.questionIndex).toBe(0)
+    expect(next.questionCounter).toBe(1)
   })
 
   test('advances question when steal also fails, returns to card owner', () => {
     let s = twoPlayerGame()
-    s = markWrong(s) // blue wrong
-    s = markWrong(s) // yellow wrong (steal failed)
-    assert.equal(s.isStealing, false)
-    assert.equal(s.activeTeam, 'blue')
-    assert.equal(s.questionIndex, 1)
-    assert.equal(s.questionCounter, 2)
+    s = markWrong(s)
+    s = markWrong(s)
+    expect(s.isStealing).toBe(false)
+    expect(s.activeTeam).toBe('blue')
+    expect(s.questionIndex).toBe(1)
+    expect(s.questionCounter).toBe(2)
   })
 
   test('sets cardComplete when Q4 steal also fails', () => {
     let s = twoPlayerGame()
     const pid = s.teams.blue.players[0].id
-    s = markCorrect(s, pid) // Q1
-    s = markCorrect(s, pid) // Q2
-    s = markCorrect(s, pid) // Q3
-    s = markWrong(s)        // Q4 blue wrong
-    s = markWrong(s)        // Q4 yellow wrong → complete
-    assert.equal(s.cardComplete, true)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markCorrect(s, pid)
+    s = markWrong(s)
+    s = markWrong(s)
+    expect(s.cardComplete).toBe(true)
   })
 })
 
@@ -142,50 +143,50 @@ describe('nextCard', () => {
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
-    s = markCorrect(s, pid) // Q4 → cardComplete, counter = 5
+    s = markCorrect(s, pid)
     s = nextCard(s)
-    assert.equal(s.cardOwner, 'yellow')
-    assert.equal(s.activeTeam, 'yellow')
-    assert.equal(s.questionIndex, 0)
-    assert.equal(s.cardComplete, false)
-    assert.equal(s.isStealing, false)
-    assert.equal(s.questionCounter, 5) // unchanged by nextCard
+    expect(s.cardOwner).toBe('yellow')
+    expect(s.activeTeam).toBe('yellow')
+    expect(s.questionIndex).toBe(0)
+    expect(s.cardComplete).toBe(false)
+    expect(s.isStealing).toBe(false)
+    expect(s.questionCounter).toBe(5)
   })
 })
 
 describe('undo', () => {
-  test('reverses the last markCorrect', () => {
+  test('reverses to the provided previous state', () => {
     let s = twoPlayerGame()
     const pid = s.teams.blue.players[0].id
+    const before = s
     s = markCorrect(s, pid)
-    assert.equal(s.questionIndex, 1)
-    s = undo(s)
-    assert.equal(s.questionIndex, 0)
-    assert.equal(s.teams.blue.players[0].points, 0)
-    assert.equal(s.questionCounter, 1)
+    expect(s.questionIndex).toBe(1)
+    s = undo(s, before)
+    expect(s.questionIndex).toBe(0)
+    expect(s.teams.blue.players[0].points).toBe(0)
+    expect(s.questionCounter).toBe(1)
   })
 
-  test('reverses markWrong (steal setup)', () => {
+  test('reverses markWrong when previous state is provided', () => {
     let s = twoPlayerGame()
+    const before = s
     s = markWrong(s)
-    assert.equal(s.isStealing, true)
-    s = undo(s)
-    assert.equal(s.isStealing, false)
-    assert.equal(s.activeTeam, 'blue')
+    expect(s.isStealing).toBe(true)
+    s = undo(s, before)
+    expect(s.isStealing).toBe(false)
+    expect(s.activeTeam).toBe('blue')
   })
 
-  test('is a no-op when there is nothing to undo', () => {
+  test('is a no-op when prev is null', () => {
     const s = twoPlayerGame()
-    const same = undo(s)
-    assert.strictEqual(same, s)
+    expect(undo(s, null)).toBe(s)
   })
 })
 
 describe('endGame', () => {
   test('transitions to ended phase', () => {
     const s = twoPlayerGame()
-    const ended = endGame(s)
-    assert.equal(ended.gamePhase, 'ended')
+    expect(endGame(s).gamePhase).toBe('ended')
   })
 })
 
@@ -194,66 +195,55 @@ describe('newGame', () => {
     let s = twoPlayerGame()
     s = endGame(s)
     s = newGame(s)
-    assert.equal(s.gamePhase, 'setup')
-    assert.deepEqual(s.teams.blue.players, [])
-    assert.deepEqual(s.teams.yellow.players, [])
+    expect(s.gamePhase).toBe('setup')
+    expect(s.teams.blue.players).toEqual([])
+    expect(s.teams.yellow.players).toEqual([])
   })
 })
 
 describe('deriveResults', () => {
-  function stateWithPoints(bluePoints, yellowPoints) {
+  function stateWithPoints(bluePoints: number[], yellowPoints: number[]): GameState {
     let s = createGame()
-    bluePoints.forEach((pts, i) => s = addPlayer(s, 'blue', `Blue${i + 1}`))
-    yellowPoints.forEach((pts, i) => s = addPlayer(s, 'yellow', `Yellow${i + 1}`))
+    bluePoints.forEach((_pts, i) => { s = addPlayer(s, 'blue', `Blue${i + 1}`) })
+    yellowPoints.forEach((_pts, i) => { s = addPlayer(s, 'yellow', `Yellow${i + 1}`) })
     s = startGame(s)
-    // Manually assign points by reconstructing player arrays
-    s = {
+    return {
       ...s,
       teams: {
         blue: { players: s.teams.blue.players.map((p, i) => ({ ...p, points: bluePoints[i] })) },
         yellow: { players: s.teams.yellow.players.map((p, i) => ({ ...p, points: yellowPoints[i] })) }
       }
     }
-    return s
   }
 
   test('winner is blue when blue has more points', () => {
-    const s = stateWithPoints([3, 2], [1, 1])
-    const { winner } = deriveResults(s)
-    assert.equal(winner, 'blue')
+    expect(deriveResults(stateWithPoints([3, 2], [1, 1])).winner).toBe('blue')
   })
 
   test('winner is yellow when yellow has more points', () => {
-    const s = stateWithPoints([1, 0], [3, 2])
-    const { winner } = deriveResults(s)
-    assert.equal(winner, 'yellow')
+    expect(deriveResults(stateWithPoints([1, 0], [3, 2])).winner).toBe('yellow')
   })
 
   test('winner is draw when scores are equal', () => {
-    const s = stateWithPoints([2, 1], [2, 1])
-    const { winner } = deriveResults(s)
-    assert.equal(winner, 'draw')
+    expect(deriveResults(stateWithPoints([2, 1], [2, 1])).winner).toBe('draw')
   })
 
   test('rankedPlayers are sorted descending by points', () => {
-    const s = stateWithPoints([5, 1], [3, 2])
-    const { rankedPlayers } = deriveResults(s)
+    const { rankedPlayers } = deriveResults(stateWithPoints([5, 1], [3, 2]))
     for (let i = 0; i < rankedPlayers.length - 1; i++) {
-      assert.ok(rankedPlayers[i].points >= rankedPlayers[i + 1].points)
+      expect(rankedPlayers[i].points).toBeGreaterThanOrEqual(rankedPlayers[i + 1].points)
     }
   })
 
   test('rankedPlayers include team property on each player', () => {
-    const s = stateWithPoints([2], [3])
-    const { rankedPlayers } = deriveResults(s)
-    assert.ok(rankedPlayers.every(p => p.team === 'blue' || p.team === 'yellow'))
+    const { rankedPlayers } = deriveResults(stateWithPoints([2], [3]))
+    expect(rankedPlayers.every(p => p.team === 'blue' || p.team === 'yellow')).toBe(true)
   })
 
   test('blueTotal and yellowTotal correctly sum player points', () => {
-    const s = stateWithPoints([4, 2], [3, 1])
-    const { blueTotal, yellowTotal } = deriveResults(s)
-    assert.equal(blueTotal, 6)
-    assert.equal(yellowTotal, 4)
+    const { blueTotal, yellowTotal } = deriveResults(stateWithPoints([4, 2], [3, 1]))
+    expect(blueTotal).toBe(6)
+    expect(yellowTotal).toBe(4)
   })
 
   test('rankedPlayers includes all players when scores are tied', () => {
@@ -263,7 +253,6 @@ describe('deriveResults', () => {
     s = addPlayer(s, 'yellow', 'C')
     s = addPlayer(s, 'yellow', 'D')
     s = startGame(s)
-    // give everyone 2 points manually
     s = {
       ...s,
       teams: {
@@ -272,40 +261,39 @@ describe('deriveResults', () => {
       }
     }
     const { rankedPlayers } = deriveResults(s)
-    assert.equal(rankedPlayers.length, 4)
-    assert.ok(rankedPlayers.every(p => p.points === 2))
+    expect(rankedPlayers.length).toBe(4)
+    expect(rankedPlayers.every(p => p.points === 2)).toBe(true)
   })
 })
 
 describe('phase guard no-ops', () => {
   test('addPlayer during playing phase returns state unchanged', () => {
     const s = twoPlayerGame()
-    assert.strictEqual(addPlayer(s, 'blue', 'Extra'), s)
+    expect(addPlayer(s, 'blue', 'Extra')).toBe(s)
   })
 
   test('startGame during playing phase returns state unchanged', () => {
     const s = twoPlayerGame()
-    assert.strictEqual(startGame(s), s)
+    expect(startGame(s)).toBe(s)
   })
 
   test('startGame during setup with no blue players returns state unchanged', () => {
     let s = createGame()
     s = addPlayer(s, 'yellow', 'Іван')
-    assert.strictEqual(startGame(s), s)
+    expect(startGame(s)).toBe(s)
   })
 
   test('startGame during setup with no yellow players returns state unchanged', () => {
     let s = createGame()
     s = addPlayer(s, 'blue', 'Олена')
-    assert.strictEqual(startGame(s), s)
+    expect(startGame(s)).toBe(s)
   })
 
   test('markCorrect during setup phase returns state unchanged', () => {
     let s = createGame()
     s = addPlayer(s, 'blue', 'Олена')
     s = addPlayer(s, 'yellow', 'Іван')
-    const pid = s.teams.blue.players[0].id
-    assert.strictEqual(markCorrect(s, pid), s)
+    expect(markCorrect(s, s.teams.blue.players[0].id)).toBe(s)
   })
 
   test('markCorrect when cardComplete returns state unchanged', () => {
@@ -314,8 +302,8 @@ describe('phase guard no-ops', () => {
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
-    s = markCorrect(s, pid) // cardComplete = true
-    assert.strictEqual(markCorrect(s, pid), s)
+    s = markCorrect(s, pid)
+    expect(markCorrect(s, pid)).toBe(s)
   })
 
   test('markWrong when cardComplete returns state unchanged', () => {
@@ -324,29 +312,29 @@ describe('phase guard no-ops', () => {
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
     s = markCorrect(s, pid)
-    s = markCorrect(s, pid) // cardComplete = true
-    assert.strictEqual(markWrong(s), s)
+    s = markCorrect(s, pid)
+    expect(markWrong(s)).toBe(s)
   })
 
   test('nextCard when cardComplete is false returns state unchanged', () => {
     const s = twoPlayerGame()
-    assert.strictEqual(nextCard(s), s)
+    expect(nextCard(s)).toBe(s)
   })
 
   test('undo during setup phase returns state unchanged', () => {
     let s = createGame()
     s = addPlayer(s, 'blue', 'Олена')
-    assert.strictEqual(undo(s), s)
+    expect(undo(s, twoPlayerGame())).toBe(s)
   })
 
   test('endGame during setup phase returns state unchanged', () => {
     let s = createGame()
     s = addPlayer(s, 'blue', 'Олена')
-    assert.strictEqual(endGame(s), s)
+    expect(endGame(s)).toBe(s)
   })
 
   test('newGame during playing phase returns state unchanged', () => {
     const s = twoPlayerGame()
-    assert.strictEqual(newGame(s), s)
+    expect(newGame(s)).toBe(s)
   })
 })

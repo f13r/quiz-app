@@ -1,8 +1,14 @@
-import { deriveResults } from '../deriveResults'
-import socket from '../socket'
+import type { GameState } from '../../../shared/types.js'
+import { useGameResults } from '../useGameResults.js'
+import socket from '../socket.js'
+import { pluralPoints } from '../utils.js'
 
-export default function ResultsScreen({ gameState }) {
-  const { blueTotal, yellowTotal, winner, rankedPlayers: sorted } = deriveResults(gameState)
+interface Props {
+  gameState: GameState
+}
+
+export default function ResultsScreen({ gameState }: Props) {
+  const { blueTotal, yellowTotal, winner, rankedPlayers: sorted } = useGameResults(gameState)
 
   const winnerText = winner === 'blue' ? '🏆 Синя команда перемогла!'
     : winner === 'yellow' ? '🏆 Жовта команда перемогла!'
@@ -22,7 +28,6 @@ export default function ResultsScreen({ gameState }) {
         {winnerText}
       </div>
 
-      {/* Team totals */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 16, textAlign: 'center' }}>
           <div style={{ fontWeight: 800, marginBottom: 4 }}>Синя</div>
@@ -34,7 +39,6 @@ export default function ResultsScreen({ gameState }) {
         </div>
       </div>
 
-      {/* Player leaderboard */}
       <div style={{ flex: 1 }}>
         <h3 style={{ marginBottom: 10, opacity: 0.8 }}>Таблиця лідерів</h3>
         {sorted.map((p, i) => (
@@ -57,7 +61,7 @@ export default function ResultsScreen({ gameState }) {
               padding: '2px 10px',
               fontSize: '0.9rem'
             }}>
-              {p.points} очок
+              {pluralPoints(p.points)}
             </span>
           </div>
         ))}

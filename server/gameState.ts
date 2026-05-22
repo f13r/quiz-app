@@ -1,13 +1,10 @@
-function opposite(team) {
+import type { GameState, TeamColor, Player } from '../shared/types.js'
+
+function opposite(team: TeamColor): TeamColor {
   return team === 'blue' ? 'yellow' : 'blue'
 }
 
-function saveForUndo(state) {
-  const { lastState, ...rest } = state
-  return { ...rest, lastState: null }
-}
-
-function advance(state) {
+function advance(state: GameState): Pick<GameState, 'questionIndex' | 'cardComplete' | 'questionCounter'> {
   if (state.questionIndex === 3) {
     return { questionIndex: state.questionIndex, cardComplete: true, questionCounter: state.questionCounter + 1 }
   }
@@ -18,7 +15,7 @@ function advance(state) {
   }
 }
 
-export function createGame() {
+export function createGame(): GameState {
   return {
     gamePhase: 'setup',
     teams: { blue: { players: [] }, yellow: { players: [] } },
@@ -28,25 +25,26 @@ export function createGame() {
     questionCounter: 1,
     isStealing: false,
     cardComplete: false,
-    lastState: null,
+    canUndo: false,
     nextPlayerId: 1
   }
 }
 
-export function addPlayer(state, team, name) {
+export function addPlayer(state: GameState, team: TeamColor, name: string): GameState {
   if (state.gamePhase !== 'setup') return state
-  const player = { id: state.nextPlayerId, name, points: 0 }
+  const player: Player = { id: state.nextPlayerId, name, points: 0 }
   return {
     ...state,
     teams: {
       ...state.teams,
       [team]: { players: [...state.teams[team].players, player] }
-    },
+    } as GameState['teams'],
+    canUndo: false,
     nextPlayerId: state.nextPlayerId + 1
   }
 }
 
-export function startGame(state) {
+export function startGame(state: GameState): GameState {
   if (state.gamePhase !== 'setup') return state
   if (!state.teams.blue.players.length || !state.teams.yellow.players.length) return state
   return {
@@ -58,38 +56,37 @@ export function startGame(state) {
     questionCounter: 1,
     isStealing: false,
     cardComplete: false,
-    lastState: null
+    canUndo: false
   }
 }
 
-export function markCorrect(state, playerId) {
+export function markCorrect(state: GameState, playerId: number): GameState {
   if (state.gamePhase !== 'playing' || state.cardComplete) return state
   const team = state.activeTeam
   if (!state.teams[team].players.some(p => p.id === playerId)) return state
-  const prev = saveForUndo(state)
   const updatedPlayers = state.teams[team].players.map(p =>
     p.id === playerId ? { ...p, points: p.points + 1 } : p
   )
   return {
     ...state,
     ...advance(state),
-    teams: { ...state.teams, [team]: { players: updatedPlayers } },
+    teams: {
+      ...state.teams,
+      [team]: { players: updatedPlayers }
+    } as GameState['teams'],
     isStealing: false,
     activeTeam: state.cardOwner,
-    lastState: prev
   }
 }
 
-export function markWrong(state) {
+export function markWrong(state: GameState): GameState {
   if (state.gamePhase !== 'playing' || state.cardComplete) return state
-  const prev = saveForUndo(state)
 
   if (!state.isStealing) {
     return {
       ...state,
       isStealing: true,
       activeTeam: opposite(state.cardOwner),
-      lastState: prev
     }
   }
 
@@ -98,13 +95,11 @@ export function markWrong(state) {
     ...advance(state),
     isStealing: false,
     activeTeam: state.cardOwner,
-    lastState: prev
   }
 }
 
-export function nextCard(state) {
+export function nextCard(state: GameState): GameState {
   if (state.gamePhase !== 'playing' || !state.cardComplete) return state
-  const prev = saveForUndo(state)
   const newOwner = opposite(state.cardOwner)
   return {
     ...state,
@@ -113,36 +108,21 @@ export function nextCard(state) {
     questionIndex: 0,
     isStealing: false,
     cardComplete: false,
-    lastState: prev
   }
 }
 
-export function undo(state) {
+export function undo(state: GameState, prev: GameState | null): GameState {
   if (state.gamePhase !== 'playing') return state
-  if (!state.lastState) return state
-  return state.lastState
+  if (!prev) return state
+  return prev
 }
 
-export function endGame(state) {
+export function endGame(state: GameState): GameState {
   if (state.gamePhase !== 'playing') return state
-  return { ...state, gamePhase: 'ended' }
+  return { ...state, gamePhase: 'ended', canUndo: false }
 }
 
-export function newGame(state) {
+export function newGame(state: GameState): GameState {
   if (state.gamePhase !== 'ended') return state
   return createGame()
-}
-
-export function deriveResults(state) {
-  if (!state?.teams?.blue?.players || !state?.teams?.yellow?.players) {
-    return { blueTotal: 0, yellowTotal: 0, winner: 'draw', rankedPlayers: [] }
-  }
-  const blueTotal = state.teams.blue.players.reduce((sum, p) => sum + p.points, 0)
-  const yellowTotal = state.teams.yellow.players.reduce((sum, p) => sum + p.points, 0)
-  const winner = blueTotal > yellowTotal ? 'blue' : yellowTotal > blueTotal ? 'yellow' : 'draw'
-  const rankedPlayers = [
-    ...state.teams.blue.players.map(p => ({ ...p, team: 'blue' })),
-    ...state.teams.yellow.players.map(p => ({ ...p, team: 'yellow' }))
-  ].sort((a, b) => b.points - a.points)
-  return { blueTotal, yellowTotal, winner, rankedPlayers }
 }

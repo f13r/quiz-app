@@ -1,8 +1,13 @@
-import { deriveResults } from '../deriveResults'
+import type { GameState } from '../../../shared/types.js'
+import { useGameResults } from '../useGameResults.js'
 
-export default function DashboardScreen({ gameState }) {
+interface Props {
+  gameState: GameState
+}
+
+export default function DashboardScreen({ gameState }: Props) {
   const { teams, cardOwner, activeTeam, questionIndex, isStealing, questionCounter } = gameState
-  const { blueTotal, yellowTotal, rankedPlayers } = deriveResults(gameState)
+  const { blueTotal, yellowTotal, rankedPlayers } = useGameResults(gameState)
   const leaders = rankedPlayers.slice(0, 3)
 
   const isBlue = activeTeam === 'blue'
@@ -25,7 +30,6 @@ export default function DashboardScreen({ gameState }) {
       gap: '2vh',
       overflow: 'hidden'
     }}>
-      {/* Team scores */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr auto 1fr',
@@ -69,7 +73,6 @@ export default function DashboardScreen({ gameState }) {
         </div>
       </div>
 
-      {/* Turn indicator */}
       <div style={{
         background: isBlue ? '#1A3A8C' : '#F5C800',
         color: isBlue ? 'white' : '#1A1A1A',
@@ -84,7 +87,6 @@ export default function DashboardScreen({ gameState }) {
         {turnText}
       </div>
 
-      {/* Top 3 */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <div style={{ marginBottom: '1.5vh', opacity: 0.6, fontSize: 'clamp(0.8rem, 1.8vh, 1.4rem)', fontWeight: 800, letterSpacing: '0.12em' }}>
           ТОП ГРАВЦІ

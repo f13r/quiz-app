@@ -9,7 +9,7 @@ A single play session from player setup through to the final results screen.
 _Avoid_: Match, session, round
 
 **Team**:
-One of two fixed competing sides — Blue or Yellow — each with 2–8 named Players.
+One of two fixed competing sides — Blue or Yellow — each with one or more named Players. No minimum or maximum player count is enforced.
 _Avoid_: Side, group, faction
 
 **Player**:

@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
-import socket from '../socket'
+import type { GameState } from '../../../shared/types.js'
+import socket from '../socket.js'
+import { pluralPoints } from '../utils.js'
 
-export default function GameScreen({ gameState }) {
+interface Props {
+  gameState: GameState
+}
+
+export default function GameScreen({ gameState }: Props) {
   const {
     teams, activeTeam, cardOwner, questionIndex,
-    questionCounter, isStealing, cardComplete, lastState
+    questionCounter, isStealing, cardComplete, canUndo
   } = gameState
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState(null)
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null)
 
-  // Reset selection when active team changes (steal switch) or question advances
   useEffect(() => {
     setSelectedPlayerId(null)
   }, [activeTeam, questionIndex])
@@ -43,7 +48,6 @@ export default function GameScreen({ gameState }) {
 
   return (
     <div className={screenClass}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontWeight: 800, fontSize: '1rem', opacity: 0.8 }}>
           Питання #{questionCounter}
@@ -53,14 +57,12 @@ export default function GameScreen({ gameState }) {
         </span>
       </div>
 
-      {/* Steal indicator */}
       {isStealing && (
         <div style={{ textAlign: 'center' }}>
           <span className="steal-badge">🔥 Крадіжка — {activeTeamLabel}</span>
         </div>
       )}
 
-      {/* Card complete state */}
       {cardComplete ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, justifyContent: 'center' }}>
           <p style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.1rem', opacity: 0.8 }}>
@@ -72,7 +74,6 @@ export default function GameScreen({ gameState }) {
         </div>
       ) : (
         <>
-          {/* Player list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
             {activePlayers.map(p => (
               <label
@@ -87,12 +88,11 @@ export default function GameScreen({ gameState }) {
                   onChange={() => setSelectedPlayerId(p.id)}
                 />
                 <span style={{ flex: 1 }}>{p.name}</span>
-                <span style={{ opacity: 0.6, fontSize: '0.9rem' }}>{p.points} очок</span>
+                <span style={{ opacity: 0.6, fontSize: '0.9rem' }}>{pluralPoints(p.points)}</span>
               </label>
             ))}
           </div>
 
-          {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button
               className="btn btn--correct"
@@ -108,9 +108,8 @@ export default function GameScreen({ gameState }) {
         </>
       )}
 
-      {/* Meta buttons */}
       <div style={{ display: 'flex', gap: 8 }}>
-        {lastState && (
+        {canUndo && (
           <button className="btn btn--undo" style={{ flex: 1 }} onClick={handleUndo}>
             ↩ Скасувати
           </button>

@@ -5,8 +5,11 @@ npm install
 npm install --prefix server
 npm install --prefix client
 
-echo "Building React client..."
-npm run build
+echo "Building server..."
+npm run build --prefix server
 
-echo "Done. Run: node server/server.js"
-echo "Or with PM2: pm2 start server/server.js --name quiz"
+echo "Building React client..."
+npm run build --prefix client
+
+echo "Done. Run: node dist/server/server.js"
+echo "Or with PM2: pm2 start dist/server/server.js --name quiz"

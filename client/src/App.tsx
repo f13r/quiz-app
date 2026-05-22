@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import HostApp from './host/HostApp'
-import DisplayApp from './display/DisplayApp'
+import HostApp from './host/HostApp.js'
+import DisplayApp from './display/DisplayApp.js'
 
 export default function App() {
   return (

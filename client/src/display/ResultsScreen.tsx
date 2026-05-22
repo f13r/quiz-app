@@ -1,7 +1,13 @@
-import { deriveResults } from '../deriveResults'
+import type { GameState } from '../../../shared/types.js'
+import { useGameResults } from '../useGameResults.js'
+import { pluralPoints } from '../utils.js'
 
-export default function ResultsScreen({ gameState }) {
-  const { blueTotal, yellowTotal, winner, rankedPlayers: sorted } = deriveResults(gameState)
+interface Props {
+  gameState: GameState
+}
+
+export default function ResultsScreen({ gameState }: Props) {
+  const { blueTotal, yellowTotal, winner, rankedPlayers: sorted } = useGameResults(gameState)
 
   const winnerText = winner === 'blue' ? '🏆 Синя команда перемогла!'
     : winner === 'yellow' ? '🏆 Жовта команда перемогла!'
@@ -19,7 +25,6 @@ export default function ResultsScreen({ gameState }) {
       gap: '2vh',
       overflow: 'hidden'
     }}>
-      {/* Winner banner */}
       <div style={{
         background: winner === 'yellow' ? '#F5C800' : winner === 'blue' ? '#1A3A8C' : 'rgba(255,255,255,0.12)',
         color: winner === 'yellow' ? '#1A1A1A' : 'white',
@@ -33,7 +38,6 @@ export default function ResultsScreen({ gameState }) {
         {winnerText}
       </div>
 
-      {/* Team totals */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vw', flexShrink: 0 }}>
         <div style={{ background: 'rgba(26,58,140,0.7)', borderRadius: 18, padding: '2.5vh 3vw', textAlign: 'center' }}>
           <div style={{ fontWeight: 800, fontSize: 'clamp(1rem, 2.8vh, 2.2rem)', marginBottom: '1vh' }}>Синя команда</div>
@@ -45,7 +49,6 @@ export default function ResultsScreen({ gameState }) {
         </div>
       </div>
 
-      {/* Leaderboard */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <div style={{ marginBottom: '1.5vh', opacity: 0.6, fontSize: 'clamp(0.8rem, 1.8vh, 1.4rem)', fontWeight: 800, letterSpacing: '0.12em', flexShrink: 0 }}>
           ТАБЛИЦЯ ЛІДЕРІВ
@@ -66,7 +69,7 @@ export default function ResultsScreen({ gameState }) {
             }}>
               <span style={{ minWidth: '3vw', opacity: 0.6, fontWeight: 800 }}>{i + 1}.</span>
               <span style={{ flex: 1 }}>{p.name}</span>
-              <span style={{ fontWeight: 900, fontSize: 'clamp(1rem, 2.8vh, 2.5rem)' }}>{p.points} очок</span>
+              <span style={{ fontWeight: 900, fontSize: 'clamp(1rem, 2.8vh, 2.5rem)' }}>{pluralPoints(p.points)}</span>
             </div>
           ))}
         </div>
